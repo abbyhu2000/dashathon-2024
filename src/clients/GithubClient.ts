@@ -1,17 +1,11 @@
 import { Octokit } from "octokit";
-import {
-  WorkflowRun,
-  Issue,
-  PullRequest,
-  ActionRuns
-} from "../types.js";
-import {RequestInterface, RequestParameters} from "@octokit/types";
+import { WorkflowRun, Issue, PullRequest, ActionRuns } from "../types.js";
+import { RequestInterface, RequestParameters } from "@octokit/types";
 
 const ORG = "opensearch-project";
 const DEFAULT_REPO = "Opensearch-Dashboards";
-const BACKFILL = process.env.OS_BACKFILL === 'true';
+const BACKFILL = process.env.OS_BACKFILL === "true";
 const PAGE_SIZE = 100;
-
 
 type GithubClientConfig = {
   repo?: string;
@@ -55,7 +49,10 @@ export default class GithubClient {
     }
 
     // for this particular API, we get different response schemas for paginated and non-paginated requests.
-    const actions = await this.performAction<WorkflowRun[] | ActionRuns>(this.sdk.rest.actions.listWorkflowRunsForRepo, params);
+    const actions = await this.performAction<WorkflowRun[] | ActionRuns>(
+      this.sdk.rest.actions.listWorkflowRunsForRepo,
+      params
+    );
 
     if ("workflow_runs" in actions) {
       return actions.workflow_runs;
@@ -70,12 +67,13 @@ export default class GithubClient {
       repo: this.repo,
       state: "all",
       per_page: PAGE_SIZE,
+      issue: "true",
     });
   }
 
   private async performAction<O>(
     action: RequestInterface,
-    params: RequestParameters,
+    params: RequestParameters
   ): Promise<O> {
     if (!BACKFILL) {
       const response = await action(params as any);
